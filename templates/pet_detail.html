@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}{{ pet.name }} – {{ pet.breed }} for Adoption | PawConnect{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 30px; padding-bottom: 70px;">
+  <!-- Breadcrumb -->
+  <div style="font-size: 0.9rem; margin-bottom: 20px; color: var(--text-muted);">
+    <a href="{{ url_for('index') }}" style="color: var(--text-muted);">Home</a> &gt; 
+    <a href="{{ url_for('pets') }}" style="color: var(--text-muted);">Available Pets</a> &gt; 
+    <span style="color: var(--heading-brown); font-weight: 600;">{{ pet.name }}</span>
+  </div>
+
+  <div class="pet-details-layout">
+    <!-- Left Column: Pet Gallery & Physical Details -->
+    <div>
+      <div class="pet-gallery">
+        <div class="pet-gallery-main">
+          <img src="{{ pet.image_url }}" alt="{{ pet.name }} photo" id="mainPetPhoto">
+          <span class="pet-badge-status {{ pet.status | lower }}" style="position: absolute; top: 18px; right: 18px; font-size: 0.85rem; padding: 6px 16px;">
+            {{ pet.status }}
+          </span>
+          <span class="pet-badge-species" style="position: absolute; top: 18px; left: 18px; font-size: 0.85rem;">
+            {{ pet.species }}
+          </span>
+        </div>
+
+        <div class="pet-specs-grid">
+          <div class="spec-box">
+            <div class="spec-label">Age</div>
+            <div class="spec-val">{{ pet.age_years }} yr {{ pet.age_months }} mo</div>
+          </div>
+          <div class="spec-box">
+            <div class="spec-label">Gender</div>
+            <div class="spec-val">{% if pet.gender == 'Male' %}♂ Male{% else %}♀ Female{% endif %}</div>
+          </div>
+          <div class="spec-box">
+            <div class="spec-label">Size</div>
+            <div class="spec-val">{{ pet.size }}</div>
+          </div>
+          <div class="spec-box">
+            <div class="spec-label">Color</div>
+            <div class="spec-val">{{ pet.color or 'Natural' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Medical & Behavioral Traits -->
+      <div style="background-color: var(--bg-card); border-radius: var(--radius-xl); padding: 28px; border: 1px solid var(--border-color); margin-top: 24px; box-shadow: var(--shadow-sm);">
+        <h3 style="font-size: 1.25rem; margin-bottom: 16px; color: var(--heading-brown);">Health & Behavior Profile</h3>
+        
+        <div class="traits-checklist" style="margin-top: 0;">
+          <div class="trait-check {% if pet.vaccinated %}yes{% else %}no{% endif %}">
+            <span>{% if pet.vaccinated %}✓{% else %}✗{% endif %}</span>
+            <span>{% if pet.vaccinated %}Fully Vaccinated{% else %}Vaccination Pending{% endif %}</span>
+          </div>
+
+          <div class="trait-check {% if pet.spayed_neutered %}yes{% else %}no{% endif %}">
+            <span>{% if pet.spayed_neutered %}✓{% else %}✗{% endif %}</span>
+            <span>{% if pet.spayed_neutered %}Spayed / Neutered{% else %}Not Yet Sterilized{% endif %}</span>
+          </div>
+
+          <div class="trait-check {% if pet.good_with_kids %}yes{% else %}no{% endif %}">
+            <span>{% if pet.good_with_kids %}✓{% else %}✗{% endif %}</span>
+            <span>{% if pet.good_with_kids %}Good with Children{% else %}Prefers Adult Home{% endif %}</span>
+          </div>
+
+          <div class="trait-check {% if pet.good_with_pets %}yes{% else %}no{% endif %}">
+            <span>{% if pet.good_with_pets %}✓{% else %}✗{% endif %}</span>
+            <span>{% if pet.good_with_pets %}Friendly with Other Pets{% else %}Best as Only Pet{% endif %}</span>
+          </div>
+        </div>
+
+        {% if pet.medical_notes %}
+          <div style="margin-top: 18px; padding: 14px; background: var(--bg-surface); border-radius: var(--radius-md); font-size: 0.92rem;">
+            <strong>🩺 Veterinary Notes:</strong>
+            <p style="color: var(--text-muted); margin-top: 4px;">{{ pet.medical_notes }}</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Right Column: Pet Info, Shelter Details & Adoption CTA -->
+    <div>
+      <div class="pet-info-card">
+        <div class="pet-header-meta">
+          <div>
+            <h1 style="font-size: 2.5rem; color: var(--heading-brown); line-height: 1.1; margin-bottom: 4px;">
+              {{ pet.name }}
+            </h1>
+            <p style="font-size: 1.15rem; color: var(--text-muted); font-weight: 500;">
+              {{ pet.breed }}
+            </p>
+          </div>
+        </div>
+
+        <div class="pet-story">
+          <h3 style="font-size: 1.15rem; margin-bottom: 10px; color: var(--heading-brown);">About {{ pet.name }}</h3>
+          <p style="white-space: pre-line;">{{ pet.description }}</p>
+        </div>
+
+        <!-- Shelter / Rescuer Info Box -->
+        <div class="shelter-contact-box">
+          <h4>
+            <span>🏡 Rescued & Cared for by:</span>
+          </h4>
+          <div style="font-size: 1.1rem; font-weight: 700; color: var(--heading-brown); margin-bottom: 6px;">
+            {{ pet.shelter_name }}
+            {% if pet.is_verified %}
+              <span style="font-size: 0.75rem; background: var(--sage-green-light); color: var(--sage-green-dark); padding: 3px 8px; border-radius: var(--radius-full); margin-left: 6px;">
+                ✓ Verified Shelter
+              </span>
+            {% endif %}
+          </div>
+          <ul class="shelter-contact-list">
+            <li>📍 <strong>Address:</strong> {{ pet.shelter_address }}, {{ pet.city }}, {{ pet.state }}</li>
+            <li>📞 <strong>Phone:</strong> {{ pet.shelter_phone }}</li>
+            <li>✉️ <strong>Email:</strong> {{ pet.shelter_email }}</li>
+            {% if pet.shelter_website %}
+              <li>🌐 <strong>Website:</strong> <a href="{{ pet.shelter_website }}" target="_blank" rel="noopener" style="color: var(--primary-orange);">{{ pet.shelter_website }}</a></li>
+            {% endif %}
+          </ul>
+        </div>
+
+        <!-- Adoption Action Section -->
+        <div style="margin-top: 28px;">
+          {% if pet.status == 'Available' %}
+            {% if session.get('user_id') %}
+              {% if session.get('role') == 'adopter' %}
+                <a href="{{ url_for('apply', pet_id=pet.id) }}" class="btn btn-primary btn-lg btn-block" id="adoptPetBtn">
+                  🐾 Apply to Adopt {{ pet.name }}
+                </a>
+                <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-top: 10px;">
+                  Adoption application will be sent directly to {{ pet.shelter_name }}.
+                </p>
+              {% else %}
+                <div style="background-color: var(--bg-surface); padding: 16px; border-radius: var(--radius-md); text-align: center; font-size: 0.9rem;">
+                  You are currently logged in as a <strong>{{ session.get('role') }}</strong>. Only registered adopter accounts can submit adoption applications.
+                </div>
+              {% endif %}
+            {% else %}
+              <div style="background-color: var(--primary-orange-light); border: 1px solid rgba(224, 122, 95, 0.3); padding: 20px; border-radius: var(--radius-lg); text-align: center;">
+                <h4 style="color: var(--heading-brown); margin-bottom: 8px;">Ready to welcome {{ pet.name }} home?</h4>
+                <p style="font-size: 0.92rem; color: var(--text-muted); margin-bottom: 16px;">
+                  Please log in or register a free adopter account to submit your adoption application.
+                </p>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                  <a href="{{ url_for('login') }}?next={{ request.path }}" class="btn btn-primary btn-sm">Log In</a>
+                  <a href="{{ url_for('register', role='adopter') }}" class="btn btn-secondary btn-sm">Create Adopter Account</a>
+                </div>
+              </div>
+            {% endif %}
+
+          {% elif pet.status == 'Pending' %}
+            <div style="background-color: var(--status-pending-bg); color: var(--status-pending-text); padding: 18px; border-radius: var(--radius-md); text-align: center; font-weight: 600;">
+              ⏳ Application Currently Under Review for {{ pet.name }}.
+            </div>
+          {% elif pet.status == 'Adopted' %}
+            <div style="background-color: var(--status-adopted-bg); color: var(--status-adopted-text); padding: 18px; border-radius: var(--radius-md); text-align: center; font-weight: 600;">
+              🎉 {{ pet.name }} has been happily adopted into a loving home!
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

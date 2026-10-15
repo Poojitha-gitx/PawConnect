@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block title %}Shelter Management Dashboard – PawConnect{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 36px; padding-bottom: 70px;">
+  <div class="dashboard-header" style="background: none; border: none; padding: 0 0 24px;">
+    <div class="dashboard-title-row">
+      <div>
+        <span class="section-tag">Shelter & Rescuer Portal</span>
+        <h1 style="font-size: 2.4rem; color: var(--heading-brown); margin-top: 4px;">
+          {{ shelter.shelter_name }}
+          {% if shelter.is_verified %}
+            <span style="font-size: 0.8rem; background: var(--sage-green-light); color: var(--sage-green-dark); padding: 4px 12px; border-radius: var(--radius-full); vertical-align: middle; margin-left: 8px;">
+              ✓ Verified Partner
+            </span>
+          {% else %}
+            <span style="font-size: 0.8rem; background: #FEF3C7; color: #B45309; padding: 4px 12px; border-radius: var(--radius-full); vertical-align: middle; margin-left: 8px;">
+              ⏳ Pending Admin Verification
+            </span>
+          {% endif %}
+        </h1>
+        <p style="color: var(--text-muted);">
+          📍 {{ shelter.address }}, {{ shelter.city }}, {{ shelter.state }} &bull; 📞 {{ shelter.phone }}
+        </p>
+      </div>
+
+      <div>
+        <a href="{{ url_for('add_pet') }}" class="btn btn-primary btn-lg" id="addNewPetBtn">
+          ➕ Add New Pet
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Metrics -->
+  <div class="stats-cards-grid">
+    <div class="stat-card">
+      <div class="stat-icon orange">🐾</div>
+      <div class="stat-details">
+        <h4>{{ pets|length }}</h4>
+        <p>Pets Listed</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon yellow">📨</div>
+      <div class="stat-details">
+        <h4>{{ applications | selectattr('status', 'equalto', 'Pending') | list | length }}</h4>
+        <p>Pending Applications</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon green">🏡</div>
+      <div class="stat-details">
+        <h4>{{ applications | selectattr('status', 'equalto', 'Approved') | list | length }}</h4>
+        <p>Approved Adoptions</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 1: Incoming Adoption Requests -->
+  <div class="dashboard-card" id="applications-section">
+    <div class="dashboard-card-header">
+      <div>
+        <h3>Adoption Applications for Your Pets</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">
+          Review applicant details, evaluate compatibility, and approve or reject submissions.
+        </p>
+      </div>
+      <span style="font-size: 0.88rem; font-weight: 700; color: var(--primary-orange);">
+        {{ applications|length }} total request(s)
+      </span>
+    </div>
+
+    {% if applications %}
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Applicant</th>
+              <th>Pet Requested</th>
+              <th>Residence & Yard</th>
+              <th>Experience & Motivation</th>
+              <th>Current Status</th>
+              <th style="min-width: 220px;">Review Decision</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for app in applications %}
+              <tr>
+                <td>
+                  <strong style="color: var(--heading-brown); font-size: 1rem;">{{ app.applicant_name }}</strong>
+                  <div style="font-size: 0.82rem; color: var(--text-muted);">✉️ {{ app.applicant_email }}</div>
+                  <div style="font-size: 0.82rem; color: var(--text-muted);">📞 {{ app.contact_phone }}</div>
+                </td>
+                <td>
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <img src="{{ app.pet_image }}" alt="{{ app.pet_name }}" style="width: 44px; height: 44px; border-radius: var(--radius-sm); object-fit: cover;">
+                    <div>
+                      <strong><a href="{{ url_for('pet_detail', pet_id=app.pet_id) }}" style="color: var(--primary-orange);">{{ app.pet_name }}</a></strong>
+                      <div style="font-size: 0.78rem; color: var(--text-muted);">{{ app.pet_breed }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div>{{ app.housing_type }}</div>
+                  <span style="font-size: 0.78rem; color: {% if app.has_yard %}var(--sage-green-dark){% else %}var(--text-muted){% endif %}; font-weight: 600;">
+                    {% if app.has_yard %}🏡 Has Yard / Garden{% else %}🏢 No Private Yard{% endif %}
+                  </span>
+                </td>
+                <td>
+                  <div style="max-width: 280px; font-size: 0.86rem;">
+                    <strong>Exp:</strong> {{ app.previous_experience | truncate(80) }}<br>
+                    <strong>Reason:</strong> {{ app.reason_for_adoption | truncate(80) }}
+                  </div>
+                </td>
+                <td>
+                  {% if app.status == 'Pending' %}
+                    <span class="pet-badge-status pending" style="position: static; display: inline-block;">Pending</span>
+                  {% elif app.status == 'Approved' %}
+                    <span class="pet-badge-status available" style="position: static; display: inline-block;">Approved</span>
+                  {% elif app.status == 'Rejected' %}
+                    <span class="pet-badge-status adopted" style="position: static; display: inline-block; background: #FDE8E8; color: #9B1C1C;">Rejected</span>
+                  {% else %}
+                    <span class="pet-badge-status adopted" style="position: static; display: inline-block;">{{ app.status }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if app.status == 'Pending' %}
+                    <form action="{{ url_for('update_application_status', app_id=app.id) }}" method="POST" style="display: flex; flex-direction: column; gap: 6px;">
+                      <input type="text" name="remarks" class="form-control" style="font-size: 0.82rem; padding: 6px 10px;" placeholder="Optional remarks for applicant...">
+                      <div style="display: flex; gap: 6px;">
+                        <button type="submit" name="status" value="Approved" class="btn btn-sage btn-sm" onclick="return confirm('Approve this adoption for {{ app.pet_name }}? This will mark the pet as Adopted.')">
+                          ✓ Approve
+                        </button>
+                        <button type="submit" name="status" value="Rejected" class="btn btn-secondary btn-sm" onclick="return confirm('Decline this application?')">
+                          ✗ Reject
+                        </button>
+                      </div>
+                    </form>
+                  {% else %}
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">
+                      <em>Decision finalized.</em><br>
+                      {% if app.shelter_remarks %}
+                        <span style="font-size: 0.8rem; background: var(--bg-surface); padding: 4px 8px; border-radius: 4px; display: inline-block; margin-top: 4px;">
+                          "{{ app.shelter_remarks }}"
+                        </span>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+        No adoption requests have been submitted for your pets yet.
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Section 2: Managed Pets Directory -->
+  <div class="dashboard-card" id="pets-section">
+    <div class="dashboard-card-header">
+      <div>
+        <h3>Your Listed Pets</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">
+          Manage listings, update medical records, and alter adoption availability.
+        </p>
+      </div>
+      <a href="{{ url_for('add_pet') }}" class="btn btn-primary btn-sm">
+        + Add New Pet
+      </a>
+    </div>
+
+    {% if pets %}
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Pet</th>
+              <th>Species & Breed</th>
+              <th>Age / Size</th>
+              <th>Admin Verification</th>
+              <th>Availability Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for pet in pets %}
+              <tr>
+                <td>
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <img src="{{ pet.image_url }}" alt="{{ pet.name }}" style="width: 48px; height: 48px; border-radius: var(--radius-md); object-fit: cover;">
+                    <div>
+                      <strong style="color: var(--heading-brown); font-size: 1.05rem;">{{ pet.name }}</strong>
+                      <div style="font-size: 0.8rem; color: var(--text-muted);">{% if pet.gender == 'Male' %}♂ Male{% else %}♀ Female{% endif %}</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <strong>{{ pet.species }}</strong>
+                  <div style="font-size: 0.82rem; color: var(--text-muted);">{{ pet.breed }}</div>
+                </td>
+                <td>
+                  <div>{{ pet.age_years }}y {{ pet.age_months }}m</div>
+                  <div style="font-size: 0.8rem; color: var(--text-muted);">{{ pet.size }}</div>
+                </td>
+                <td>
+                  {% if pet.is_approved %}
+                    <span style="font-size: 0.8rem; background: var(--sage-green-light); color: var(--sage-green-dark); padding: 3px 10px; border-radius: var(--radius-full); font-weight: 700;">
+                      ✓ Approved
+                    </span>
+                  {% else %}
+                    <span style="font-size: 0.8rem; background: #FEF3C7; color: #B45309; padding: 3px 10px; border-radius: var(--radius-full); font-weight: 700;">
+                      ⏳ Pending Approval
+                    </span>
+                  {% endif %}
+                </td>
+                <td>
+                  <!-- Quick status dropdown form -->
+                  <form action="{{ url_for('update_pet_status', pet_id=pet.id) }}" method="POST" style="display: flex; gap: 6px; align-items: center;">
+                    <select name="status" class="form-control" style="font-size: 0.85rem; padding: 4px 8px; width: 120px;" onchange="this.form.submit()">
+                      <option value="Available" {% if pet.status == 'Available' %}selected{% endif %}>Available</option>
+                      <option value="Pending" {% if pet.status == 'Pending' %}selected{% endif %}>Pending</option>
+                      <option value="Adopted" {% if pet.status == 'Adopted' %}selected{% endif %}>Adopted</option>
+                    </select>
+                  </form>
+                </td>
+                <td>
+                  <div style="display: flex; gap: 6px;">
+                    <a href="{{ url_for('pet_detail', pet_id=pet.id) }}" class="btn btn-secondary btn-sm" title="Preview Public Page">
+                      👁️
+                    </a>
+                    <a href="{{ url_for('edit_pet', pet_id=pet.id) }}" class="btn btn-secondary btn-sm" title="Edit Pet Details">
+                      ✏️ Edit
+                    </a>
+                    <form action="{{ url_for('delete_pet', pet_id=pet.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete {{ pet.name }}?');" style="display: inline;">
+                      <button type="submit" class="btn btn-sm" style="background: #FDE8E8; color: #9B1C1C; border: none;" title="Delete Pet">
+                        🗑️
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div style="text-align: center; padding: 50px 20px;">
+        <div style="font-size: 3rem; margin-bottom: 12px;">🐾</div>
+        <h3>No pets listed under your shelter yet</h3>
+        <p style="color: var(--text-muted); margin-bottom: 20px;">
+          Add your first rescue pet to connect with caring adopters!
+        </p>
+        <a href="{{ url_for('add_pet') }}" class="btn btn-primary">
+          ➕ Add Pet Now
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

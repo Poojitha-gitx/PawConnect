@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Register Account – PawConnect{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="auth-wrapper" style="max-width: 680px;">
+    <div class="auth-card">
+      <div style="text-align: center; font-size: 2.5rem; margin-bottom: 8px;">🐾</div>
+      <h2>Join PawConnect</h2>
+      <p class="auth-sub">Choose your account type to get started with finding or rescuing pets.</p>
+
+      <!-- Role Selector Tabs -->
+      <div class="role-tabs">
+        <button type="button" class="role-tab {% if request.args.get('role') != 'shelter' %}active{% endif %}" id="tabAdopter" onclick="switchRole('adopter')">
+          👤 Pet Adopter
+        </button>
+        <button type="button" class="role-tab {% if request.args.get('role') == 'shelter' %}active{% endif %}" id="tabShelter" onclick="switchRole('shelter')">
+          🏡 Shelter / Rescuer
+        </button>
+      </div>
+
+      <form action="{{ url_for('register') }}" method="POST" id="registerForm">
+        <input type="hidden" name="role" id="selectedRole" value="{{ request.args.get('role', 'adopter') }}">
+
+        <!-- Common User Credentials -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+          <div class="form-group">
+            <label for="full_name" id="nameLabel">Full Name</label>
+            <input type="text" id="full_name" name="full_name" class="form-control" placeholder="e.g. Pooja Sharma" required>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" class="form-control" placeholder="name@example.com" required>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" class="form-control" placeholder="+91 98765 43210" required>
+          </div>
+
+          <div class="form-group">
+            <label for="city_user">City</label>
+            <input type="text" id="city_user" name="city" class="form-control" placeholder="e.g. Bangalore, Mumbai" required>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label for="address">Address</label>
+          <input type="text" id="address" name="address" class="form-control" placeholder="Street, Area, Landmark" required>
+        </div>
+
+        <!-- Shelter-Specific Section (Shows when Shelter tab is selected) -->
+        <div id="shelterFields" style="display: {% if request.args.get('role') == 'shelter' %}block{% else %}none{% endif %}; background-color: var(--bg-surface); padding: 20px; border-radius: var(--radius-lg); margin-bottom: 20px; border: 1px solid var(--border-color);">
+          <h3 style="font-size: 1.1rem; color: var(--heading-brown); margin-bottom: 14px; display: flex; align-items: center; gap: 6px;">
+            <span>🏡 Shelter & Rescue Details</span>
+          </h3>
+
+          <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 14px; margin-bottom: 14px;">
+            <div class="form-group">
+              <label for="shelter_name">Official Shelter / Rescue Name</label>
+              <input type="text" id="shelter_name" name="shelter_name" class="form-control" placeholder="e.g. Hope for Paws Foundation">
+            </div>
+
+            <div class="form-group">
+              <label for="license_number">Govt / NGO Registration / License</label>
+              <input type="text" id="license_number" name="license_number" class="form-control" placeholder="e.g. REG-NGO-2024-88">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+            <div class="form-group">
+              <label for="state">State</label>
+              <input type="text" id="state" name="state" class="form-control" placeholder="e.g. Karnataka, Maharashtra">
+            </div>
+
+            <div class="form-group">
+              <label for="website">Website / Social Page (Optional)</label>
+              <input type="url" id="website" name="website" class="form-control" placeholder="https://example.org">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="description">About Shelter / Rescue Mission</label>
+            <textarea id="description" name="description" class="form-control" rows="2" placeholder="Briefly describe your animal rescue experience and facilities..."></textarea>
+          </div>
+        </div>
+
+        <!-- Passwords -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+          <div class="form-group">
+            <label for="password">Create Password</label>
+            <input type="password" id="password" name="password" class="form-control" placeholder="Minimum 6 characters" required minlength="6">
+          </div>
+
+          <div class="form-group">
+            <label for="confirm_password">Confirm Password</label>
+            <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Re-enter password" required minlength="6">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="submitRegisterBtn">
+          Create Account &rarr;
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        Already registered with PawConnect? 
+        <a href="{{ url_for('login') }}">Sign In here</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function switchRole(role) {
+  const tabAdopter = document.getElementById('tabAdopter');
+  const tabShelter = document.getElementById('tabShelter');
+  const shelterFields = document.getElementById('shelterFields');
+  const selectedRole = document.getElementById('selectedRole');
+  const nameLabel = document.getElementById('nameLabel');
+
+  selectedRole.value = role;
+
+  if (role === 'shelter') {
+    tabShelter.classList.add('active');
+    tabAdopter.classList.remove('active');
+    shelterFields.style.display = 'block';
+    nameLabel.textContent = 'Representative Full Name';
+    document.getElementById('shelter_name').setAttribute('required', 'required');
+  } else {
+    tabAdopter.classList.add('active');
+    tabShelter.classList.remove('active');
+    shelterFields.style.display = 'none';
+    nameLabel.textContent = 'Full Name';
+    document.getElementById('shelter_name').removeAttribute('required');
+  }
+}
+
+// Client-side password match validation
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+  const p1 = document.getElementById('password').value;
+  const p2 = document.getElementById('confirm_password').value;
+  if (p1 !== p2) {
+    e.preventDefault();
+    alert('Passwords do not match. Please verify and re-enter.');
+  }
+});
+</script>
+{% endblock %}

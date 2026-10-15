@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block title %}PawConnect – Connecting Paws with Loving Homes{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-content">
+        <div class="hero-tag">
+          <span>🐾</span> Connecting Paws with Loving Homes
+        </div>
+        <h1 class="hero-title">
+          Find Your New <br><span>Best Friend</span> Today.
+        </h1>
+        <p class="hero-lead">
+          PawConnect unites animal shelters, dedicated rescuers, and compassionate adopters across India. Discover verified pets waiting for a warm, forever home.
+        </p>
+
+        <div class="hero-cta">
+          <a href="{{ url_for('pets') }}" class="btn btn-primary btn-lg" id="heroAdoptBtn">
+            🐾 Adopt Now
+          </a>
+          <a href="{{ url_for('register', role='shelter') }}" class="btn btn-secondary btn-lg" id="heroShelterBtn">
+            Register as Shelter
+          </a>
+        </div>
+
+        <div class="hero-stats">
+          <div class="stat-item">
+            <h3>{{ stats.total_pets or '150+' }}</h3>
+            <p>Rescued Pets</p>
+          </div>
+          <div class="stat-item">
+            <h3>{{ stats.total_shelters or '40+' }}</h3>
+            <p>Partner Shelters</p>
+          </div>
+          <div class="stat-item">
+            <h3>{{ stats.adoptions_count or '98%' }}</h3>
+            <p>Successful Matches</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-image-wrapper">
+        <div class="hero-image-card">
+          <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=1000&q=80" alt="Happy rescue dog smiling in the sun">
+          
+          <div class="hero-floating-badge badge-top">
+            <span class="floating-icon">🛡️</span>
+            <div class="floating-text">
+              <div class="badge-title">Verified Shelters</div>
+              <div class="badge-sub">100% Ethical & Checked</div>
+            </div>
+          </div>
+
+          <div class="hero-floating-badge badge-bottom">
+            <span class="floating-icon">❤️</span>
+            <div class="floating-text">
+              <div class="badge-title">Health Screened</div>
+              <div class="badge-sub">Vaccinated & Neutered</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Search Bar Overlay -->
+    <div class="quick-search-box">
+      <form action="{{ url_for('pets') }}" method="GET" class="search-form-row">
+        <div class="form-group">
+          <label for="q">Keyword or Breed</label>
+          <input type="text" id="q" name="q" class="form-control" placeholder="e.g. Milo, Retriever, Indie...">
+        </div>
+
+        <div class="form-group">
+          <label for="species">Pet Type</label>
+          <select id="species" name="species" class="form-control">
+            <option value="">All Animals</option>
+            <option value="Dog">Dogs 🐶</option>
+            <option value="Cat">Cats 🐱</option>
+            <option value="Rabbit">Rabbits 🐰</option>
+            <option value="Bird">Birds 🦜</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="city">City / Location</label>
+          <select id="city" name="city" class="form-control">
+            <option value="">All Cities</option>
+            {% for c in cities %}
+              <option value="{{ c }}">{{ c }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="status">Availability</label>
+          <select id="status" name="status" class="form-control">
+            <option value="Available" selected>Available Now</option>
+            <option value="">Any Status</option>
+            <option value="Pending">Pending Review</option>
+            <option value="Adopted">Adopted</option>
+          </select>
+        </div>
+
+        <div>
+          <button type="submit" class="btn btn-primary" style="height: 48px; width: 100%;">
+            🔍 Search
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Pets Section -->
+<section class="section" id="featured-pets">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Waiting for a Family</span>
+      <h2 class="section-title">Meet Our Featured Pets</h2>
+      <p class="section-subtitle">Every pet has a unique tale of resilience and endless love. Browse recently listed companions waiting for their forever home.</p>
+    </div>
+
+    <div class="pets-grid">
+      {% for pet in featured_pets %}
+        <article class="pet-card" data-name="{{ pet.name }}" data-species="{{ pet.species }}" data-breed="{{ pet.breed }}" data-city="{{ pet.city }}">
+          <div class="pet-card-media">
+            <img src="{{ pet.image_url }}" alt="{{ pet.name }} - {{ pet.breed }}" loading="lazy">
+            <span class="pet-badge-species">{{ pet.species }}</span>
+            <span class="pet-badge-status {{ pet.status | lower }}">{{ pet.status }}</span>
+          </div>
+
+          <div class="pet-card-body">
+            <div class="pet-card-header">
+              <h3 class="pet-name">{{ pet.name }}</h3>
+              <span class="pet-gender">{% if pet.gender == 'Male' %}♂ Male{% else %}♀ Female{% endif %}</span>
+            </div>
+
+            <p class="pet-breed">{{ pet.breed }}</p>
+
+            <div class="pet-tags">
+              <span class="tag-pill">⏳ {{ pet.age_years }} yr {{ pet.age_months }} mo</span>
+              <span class="tag-pill">📏 {{ pet.size }}</span>
+              {% if pet.vaccinated %}
+                <span class="tag-pill" style="color: var(--sage-green-dark);">💉 Vaccinated</span>
+              {% endif %}
+            </div>
+
+            <div class="pet-shelter-info">
+              <span class="shelter-icon">📍</span>
+              <span><strong>{{ pet.shelter_name }}</strong>, {{ pet.city }}</span>
+            </div>
+
+            <div class="pet-card-footer">
+              <a href="{{ url_for('pet_detail', pet_id=pet.id) }}" class="btn btn-secondary btn-block">
+                View Full Details &rarr;
+              </a>
+            </div>
+          </div>
+        </article>
+      {% else %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; background: white; border-radius: var(--radius-lg);">
+          <p>No featured pets found. Check back soon or register a new pet from a shelter account!</p>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div style="text-align: center; margin-top: 40px;">
+      <a href="{{ url_for('pets') }}" class="btn btn-primary btn-lg">
+        Explore All Available Pets &rarr;
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- How PawConnect Works Section -->
+<section class="section how-it-works-section" id="how-it-works">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Simple & Compassionate</span>
+      <h2 class="section-title">How PawConnect Works</h2>
+      <p class="section-subtitle">We make pet adoption transparent, organized, and stress-free for both adopters and shelter caretakers in four simple steps.</p>
+    </div>
+
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-number">1</div>
+        <div class="step-icon">🔎</div>
+        <h3>Search & Discover</h3>
+        <p>Filter through verified pet listings by city, species, age, and temperament to find your compatible companion.</p>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">2</div>
+        <div class="step-icon">📝</div>
+        <h3>Submit Application</h3>
+        <p>Log in as an adopter and complete a simple adoption request detailing your living environment and experience.</p>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">3</div>
+        <div class="step-icon">🤝</div>
+        <h3>Shelter Review</h3>
+        <p>The shelter evaluates applications, conducts a friendly interview, and answers all your questions about pet care.</p>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">4</div>
+        <div class="step-icon">🏡</div>
+        <h3>Welcome Home</h3>
+        <p>Once approved, complete adoption formalities and welcome your new companion into a warm, safe home.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Why Adopt Section -->
+<section class="section" id="about">
+  <div class="container">
+    <div class="why-adopt-grid">
+      <div class="why-adopt-media">
+        <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=1000&q=80" alt="Boy hugging happy rescue dog">
+      </div>
+
+      <div class="why-adopt-content">
+        <span class="section-tag">Why Choose Adoption</span>
+        <h2 class="section-title">Save a Life, Gain an Unconditional Friend.</h2>
+        <p class="section-subtitle" style="text-align: left; margin-bottom: 20px;">
+          Millions of wonderful animals are waiting in shelters across the nation. When you adopt through PawConnect, you directly combat illegal backyard breeding and give a second chance to a deserving animal.
+        </p>
+
+        <ul class="feature-list">
+          <li class="feature-item">
+            <div class="feature-icon-circle">✓</div>
+            <div class="feature-text">
+              <h4>Database Verified Shelters</h4>
+              <p>Admin verification guarantees that only legitimate rescues and ethical foster homes can list pets.</p>
+            </div>
+          </li>
+          <li class="feature-item">
+            <div class="feature-icon-circle">✓</div>
+            <div class="feature-text">
+              <h4>Transparent Medical Records</h4>
+              <p>Every pet record specifies real-time vaccination, sterilization, and health notes tracked in MySQL.</p>
+            </div>
+          </li>
+          <li class="feature-item">
+            <div class="feature-icon-circle">✓</div>
+            <div class="feature-text">
+              <h4>Direct Shelter Communication</h4>
+              <p>Get authentic shelter contacts, address details, and prompt application status updates.</p>
+            </div>
+          </li>
+        </ul>
+
+        <div style="margin-top: 32px;">
+          <a href="{{ url_for('pets') }}" class="btn btn-sage btn-lg">Browse Available Pets</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action Banner -->
+<section class="section" style="padding-top: 0;">
+  <div class="container">
+    <div style="background: linear-gradient(135deg, var(--heading-brown) 0%, #211610 100%); color: #FFFFFF; padding: 50px 40px; border-radius: var(--radius-xl); text-align: center; box-shadow: var(--shadow-lg);">
+      <h2 style="color: #FFFFFF; font-size: 2.3rem; margin-bottom: 12px;">Are You an Animal Shelter or Rescuer?</h2>
+      <p style="color: #D6CCC2; max-width: 640px; margin: 0 auto 28px; font-size: 1.05rem;">
+        List your rescued animals on PawConnect for free. Reach thousands of screened adopters, manage applications digitally, and streamline adoptions.
+      </p>
+      <a href="{{ url_for('register', role='shelter') }}" class="btn btn-primary btn-lg">
+        Register Your Shelter Today &rarr;
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}

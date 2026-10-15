@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}PawConnect – Pet Adoption Management System{% endblock %}</title>
+  <meta name="description" content="PawConnect connects animal shelters, rescuers and pet lovers to find loving forever homes for dogs, cats, rabbits and birds.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐾</text></svg>">
+</head>
+<body>
+  <!-- Header & Navigation -->
+  <header class="site-header">
+    <div class="container">
+      <nav class="navbar" aria-label="Main Navigation">
+        <a href="{{ url_for('index') }}" class="brand-logo" id="brandLogo">
+          <span class="paw-icon">🐾</span>
+          <span>Paw<span style="color: var(--primary-orange);">Connect</span></span>
+        </a>
+
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+          ☰
+        </button>
+
+        <ul class="nav-menu" id="navMenu">
+          <li><a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">Home</a></li>
+          <li><a href="{{ url_for('pets') }}" class="nav-link {% if request.endpoint == 'pets' %}active{% endif %}">Find a Pet</a></li>
+          <li><a href="{{ url_for('index') }}#how-it-works" class="nav-link">How It Works</a></li>
+          <li><a href="{{ url_for('index') }}#about" class="nav-link">About</a></li>
+
+          {% if session.get('user_id') %}
+            {% if session.get('role') == 'adopter' %}
+              <li><a href="{{ url_for('adopter_dashboard') }}" class="nav-link {% if request.endpoint == 'adopter_dashboard' %}active{% endif %}">My Applications</a></li>
+            {% elif session.get('role') == 'shelter' %}
+              <li><a href="{{ url_for('shelter_dashboard') }}" class="nav-link {% if request.endpoint == 'shelter_dashboard' %}active{% endif %}">Shelter Portal</a></li>
+            {% elif session.get('role') == 'admin' %}
+              <li><a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">Admin Console</a></li>
+            {% endif %}
+          {% endif %}
+        </ul>
+
+        <div class="nav-actions">
+          {% if session.get('user_id') %}
+            <div class="user-pill">
+              <span>👤 {{ session.get('user_name', 'User') }}</span>
+              <span class="user-badge {{ session.get('role') }}">{{ session.get('role') }}</span>
+            </div>
+            <a href="{{ url_for('logout') }}" class="btn btn-secondary btn-sm" id="logoutBtn">Log Out</a>
+          {% else %}
+            <a href="{{ url_for('login') }}" class="btn btn-secondary btn-sm" id="navLoginBtn">Log In</a>
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-sm" id="navRegisterBtn">Register</a>
+          {% endif %}
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Flash Messages -->
+  <div class="container flash-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category if category != 'error' else 'danger' }}" role="alert">
+            <span>{{ message }}</span>
+            <button type="button" class="alert-close" onclick="this.parentElement.remove();" aria-label="Close alert">&times;</button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- Main Content Block -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="{{ url_for('index') }}" class="brand-logo">
+            <span class="paw-icon">🐾</span>
+            <span>PawConnect</span>
+          </a>
+          <p>Connecting Paws with Loving Homes. A comprehensive Pet Adoption Management platform empowering ethical shelters, rescues, and adopters.</p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Explore</h4>
+          <ul class="footer-links">
+            <li><a href="{{ url_for('pets') }}">Browse Available Pets</a></li>
+            <li><a href="{{ url_for('pets', species='Dog') }}">Adopt Dogs</a></li>
+            <li><a href="{{ url_for('pets', species='Cat') }}">Adopt Cats</a></li>
+            <li><a href="{{ url_for('pets', species='Rabbit') }}">Adopt Rabbits</a></li>
+            <li><a href="{{ url_for('pets', species='Bird') }}">Adopt Birds</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Portals</h4>
+          <ul class="footer-links">
+            {% if not session.get('user_id') %}
+              <li><a href="{{ url_for('login') }}">User Sign In</a></li>
+              <li><a href="{{ url_for('register', role='shelter') }}">Register a Shelter</a></li>
+              <li><a href="{{ url_for('register', role='adopter') }}">Become an Adopter</a></li>
+              <li><a href="{{ url_for('login') }}">Admin Login</a></li>
+            {% else %}
+              {% if session.get('role') == 'shelter' %}
+                <li><a href="{{ url_for('shelter_dashboard') }}">Shelter Dashboard</a></li>
+                <li><a href="{{ url_for('add_pet') }}">List a New Pet</a></li>
+              {% elif session.get('role') == 'admin' %}
+                <li><a href="{{ url_for('admin_dashboard') }}">Admin Moderation</a></li>
+              {% else %}
+                <li><a href="{{ url_for('adopter_dashboard') }}">Adopter Dashboard</a></li>
+              {% endif %}
+            {% endif %}
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>DBMS Mini Project</h4>
+          <p style="font-size: 0.9rem; color: #C0B4A9; margin-bottom: 12px;">
+            B.Tech Computer Science DBMS Mini Project built with Python Flask, MySQL Connector, and Responsive Vanilla CSS.
+          </p>
+          <div style="font-size: 0.85rem; color: var(--sage-green);">
+            ✓ Relational 3NF Schema<br>
+            ✓ Parameterized Prepared Queries<br>
+            ✓ Role-based Access Control
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 PawConnect – Pet Adoption Management System. All rights reserved.</div>
+        <div>Built for Academic DBMS Demonstration</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

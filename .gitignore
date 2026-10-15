@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.env
+.env
+venv/
+env/
+ENV/
+.venv
+
+# Static Uploads (Optional: keep demo files, ignore runtime user uploads if any)
+static/uploads/*
+!static/uploads/.gitkeep
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+.env
+.env.*
+!.env.example
+database.backup.sql
+

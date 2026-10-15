@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}My Adoption Applications – PawConnect{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 36px; padding-bottom: 70px;">
+  <div class="dashboard-header" style="background: none; border: none; padding: 0 0 24px;">
+    <div class="dashboard-title-row">
+      <div>
+        <span class="section-tag">Adopter Portal</span>
+        <h1 style="font-size: 2.4rem; color: var(--heading-brown); margin-top: 4px;">
+          Welcome back, {{ session.get('user_name') }}!
+        </h1>
+        <p style="color: var(--text-muted);">
+          Track real-time status updates and remarks from animal shelters for your submitted adoption applications.
+        </p>
+      </div>
+      <div>
+        <a href="{{ url_for('pets') }}" class="btn btn-primary">
+          🐾 Browse More Pets
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Stats Cards -->
+  <div class="stats-cards-grid">
+    <div class="stat-card">
+      <div class="stat-icon blue">📋</div>
+      <div class="stat-details">
+        <h4>{{ applications|length }}</h4>
+        <p>Total Applications</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon yellow">⏳</div>
+      <div class="stat-details">
+        <h4>{{ applications | selectattr('status', 'equalto', 'Pending') | list | length }}</h4>
+        <p>Pending Review</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon green">🎉</div>
+      <div class="stat-details">
+        <h4>{{ applications | selectattr('status', 'equalto', 'Approved') | list | length }}</h4>
+        <p>Approved Matches</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Applications Table / Cards -->
+  <div class="dashboard-card">
+    <div class="dashboard-card-header">
+      <h3>Your Submitted Adoption Applications</h3>
+      <span style="font-size: 0.88rem; color: var(--text-muted); font-weight: 600;">
+        {{ applications|length }} application(s) found
+      </span>
+    </div>
+
+    {% if applications %}
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Pet</th>
+              <th>Shelter & Location</th>
+              <th>Applied On</th>
+              <th>Status</th>
+              <th>Shelter Feedback / Remarks</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for app in applications %}
+              <tr>
+                <td>
+                  <div style="display: flex; align-items: center; gap: 14px;">
+                    <img src="{{ app.image_url }}" alt="{{ app.pet_name }}" style="width: 54px; height: 54px; border-radius: var(--radius-md); object-fit: cover;">
+                    <div>
+                      <strong style="color: var(--heading-brown); font-size: 1.05rem;">{{ app.pet_name }}</strong>
+                      <div style="font-size: 0.8rem; color: var(--text-muted);">{{ app.breed }} ({{ app.species }})</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <strong>{{ app.shelter_name }}</strong>
+                  <div style="font-size: 0.82rem; color: var(--text-muted);">📍 {{ app.shelter_city }} &bull; 📞 {{ app.shelter_phone }}</div>
+                </td>
+                <td>
+                  {{ app.created_at.strftime('%d %b %Y') if app.created_at else 'Recent' }}
+                </td>
+                <td>
+                  {% if app.status == 'Pending' %}
+                    <span class="pet-badge-status pending" style="position: static; display: inline-block;">Pending Review</span>
+                  {% elif app.status == 'Approved' %}
+                    <span class="pet-badge-status available" style="position: static; display: inline-block;">Approved! 🎉</span>
+                  {% elif app.status == 'Rejected' %}
+                    <span class="pet-badge-status adopted" style="position: static; display: inline-block; background: #FDE8E8; color: #9B1C1C;">Not Selected</span>
+                  {% else %}
+                    <span class="pet-badge-status adopted" style="position: static; display: inline-block;">{{ app.status }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if app.shelter_remarks %}
+                    <div style="font-size: 0.88rem; color: var(--text-dark); background: var(--bg-surface); padding: 8px 12px; border-radius: var(--radius-sm); max-width: 280px;">
+                      💬 "{{ app.shelter_remarks }}"
+                    </div>
+                  {% else %}
+                    <span style="font-size: 0.85rem; color: var(--text-light); font-style: italic;">No feedback entered yet.</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <a href="{{ url_for('pet_detail', pet_id=app.pet_id) }}" class="btn btn-secondary btn-sm">
+                    View Pet
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div style="text-align: center; padding: 60px 20px;">
+        <div style="font-size: 3rem; margin-bottom: 12px;">🐾</div>
+        <h3>You haven't submitted any adoption applications yet</h3>
+        <p style="color: var(--text-muted); margin-bottom: 24px;">
+          Explore our verified listings of rescued pets and find your new companion today!
+        </p>
+        <a href="{{ url_for('pets') }}" class="btn btn-primary">
+          Browse Available Pets &rarr;
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
