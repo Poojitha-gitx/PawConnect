@@ -768,4 +768,4 @@ if __name__ == '__main__':
     print(" PawConnect - Pet Adoption Management System")
     print(f" Running locally on: http://127.0.0.1:{port}")
     print("=" * 60)
-    app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(host='0.0.0.0', port=port, debug=False)
