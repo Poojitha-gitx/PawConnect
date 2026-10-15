@@ -15,7 +15,14 @@ import db
 
 load_dotenv()
 
-app = Flask(__name__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+app = Flask(
+    __name__,
+    static_folder=os.path.join(BASE_DIR, 'static'),
+    template_folder=os.path.join(BASE_DIR, 'templates'),
+    static_url_path='/static'
+)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'pawconnect_default_secret_key_2026')
 app.config['DEBUG'] = os.getenv('FLASK_DEBUG', 'True').lower() in ('true', '1', 't')
 
