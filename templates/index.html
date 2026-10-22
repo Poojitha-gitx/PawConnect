@@ -4,7 +4,7 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="hero-section">
+<section class="hero-section" id="hero-section">
   <div class="container">
     <div class="hero-grid">
       <div class="hero-content">
@@ -46,27 +46,27 @@
       <div class="hero-image-wrapper">
         <div class="hero-image-card">
           <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=1000&q=80" alt="Happy rescue dog smiling in the sun">
-          
-          <div class="hero-floating-badge badge-top">
-            <span class="floating-icon">🛡️</span>
-            <div class="floating-text">
-              <div class="badge-title">Verified Shelters</div>
-              <div class="badge-sub">100% Ethical & Checked</div>
-            </div>
-          </div>
+        </div>
 
-          <div class="hero-floating-badge badge-bottom">
-            <span class="floating-icon">❤️</span>
-            <div class="floating-text">
-              <div class="badge-title">Health Screened</div>
-              <div class="badge-sub">Vaccinated & Neutered</div>
-            </div>
+        <div class="hero-floating-badge badge-top">
+          <span class="floating-icon">🛡️</span>
+          <div class="floating-text">
+            <div class="badge-title">Verified Shelters</div>
+            <div class="badge-sub">100% Ethical & Checked</div>
+          </div>
+        </div>
+
+        <div class="hero-floating-badge badge-bottom">
+          <span class="floating-icon">❤️</span>
+          <div class="floating-text">
+            <div class="badge-title">Health Screened</div>
+            <div class="badge-sub">Vaccinated & Neutered</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Quick Search Bar Overlay -->
+    <!-- Quick Search Bar -->
     <div class="quick-search-box">
       <form action="{{ url_for('pets') }}" method="GET" class="search-form-row">
         <div class="form-group">
@@ -105,8 +105,8 @@
           </select>
         </div>
 
-        <div>
-          <button type="submit" class="btn btn-primary" style="height: 48px; width: 100%;">
+        <div class="form-group form-group-btn">
+          <button type="submit" class="btn btn-primary search-submit-btn">
             🔍 Search
           </button>
         </div>
