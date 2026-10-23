@@ -93,7 +93,7 @@
                data-breed="{{ pet.breed }}" 
                data-city="{{ pet.city }}">
         <div class="pet-card-media">
-          <img src="{{ pet.image_url }}" alt="{{ pet.name }} - {{ pet.breed }}" loading="lazy">
+          <img src="{{ pet.image_url }}" alt="{{ pet.name }} - {{ pet.breed }}" loading="lazy"{% if pet.name == 'Sunny' %} class="pet-img-sunny"{% endif %}>
           <span class="pet-badge-species">{{ pet.species }}</span>
           <span class="pet-badge-status {{ pet.status | lower }}">{{ pet.status }}</span>
         </div>

@@ -668,6 +668,12 @@ textarea.form-control {
   transition: transform 0.4s ease;
 }
 
+/* Custom framing for pets with high focal points (e.g. Sunny the Cockatiel) */
+.pet-card[data-name="Sunny"] .pet-card-media img,
+.pet-card-media img.pet-img-sunny {
+  object-position: center 10%;
+}
+
 .pet-card:hover .pet-card-media img {
   transform: scale(1.06);
 }
@@ -1507,5 +1513,10 @@ textarea.form-control {
 
   .hero-image-card img {
     height: 240px;
+  }
+
+  .pets-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
 }
